@@ -50,7 +50,7 @@ func detectCollision():
 		return true
 	var testRadius = radius + 1
 	for y in range(-radius, radius):
-		var x = sqrt(testRadius*testRadius - y*y)
+		var x = 2#sqrt(testRadius*testRadius - y*y)
 		var offset = Vector2(x, y).rotated(playerRotation)
 		var testPos = playerPosition + offset
 		if (testPos.x < 0 or testPos.y < 0 or 
@@ -95,7 +95,7 @@ func _process(delta: float) -> void:
 	queue_redraw()
 	pass
 	
-var deadTimer = 0.05
+var deadTimer = 0.000
 
 func _draw():
 	if gapLengthTimer > 0:
@@ -110,6 +110,5 @@ func _draw():
 		#draw_circle(center, 2, Color.HOT_PINK)		
 		var rotStart = playerLastRotation-dir*PI/2
 		var rotEnd = playerRotation-dir*PI/2*0.99#0.99 to make segments overlap better
-		draw_arc(center, radius, rotStart, rotEnd, 20, Color.GREEN, playerWidth)
-	draw_circle(playerPosition, playerWidth / 2 - 0.5, Color.GREEN)
+		draw_arc(center, radius, rotStart, rotEnd, 20, Color.GREEN, playerWidth)	
 	pass
