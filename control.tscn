@@ -1,0 +1,49 @@
+[gd_scene format=3 uid="uid://d3psli05u6ruo"]
+
+[ext_resource type="Script" uid="uid://y1d16y75u2cn" path="res://CanvasTest.gd" id="1_62e2m"]
+[ext_resource type="Script" uid="uid://be2xb1uvaoukh" path="res://UpperDrawLayer.gd" id="2_qtu10"]
+
+[node name="Control" type="Control" unique_id=1910646405]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -732.0
+offset_top = 71.0
+offset_right = -666.0
+offset_bottom = 139.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ScoreLabel" type="Label" parent="." unique_id=246541921]
+layout_mode = 0
+offset_left = 1125.0
+offset_top = 50.0
+offset_right = 1220.0
+offset_bottom = 447.0
+text = "Runde"
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="." unique_id=270050344]
+layout_mode = 1
+offset_left = 565.0
+offset_top = -151.0
+offset_right = 1558.627
+offset_bottom = 549.0
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer" unique_id=857775920]
+disable_3d = true
+handle_input_locally = false
+msaa_2d = 3
+size = Vector2i(700, 700)
+render_target_update_mode = 4
+
+[node name="Node2D" type="Node2D" parent="SubViewportContainer/SubViewport" unique_id=1078440294]
+position = Vector2(16, 16)
+script = ExtResource("1_62e2m")
+
+[node name="Node2D" type="Node2D" parent="." unique_id=1209071030 node_paths=PackedStringArray("primaryNode")]
+position = Vector2(-32, 126)
+script = ExtResource("2_qtu10")
+primaryNode = NodePath("../SubViewportContainer/SubViewport/Node2D")
