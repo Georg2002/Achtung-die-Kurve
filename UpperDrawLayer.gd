@@ -5,13 +5,11 @@ extends Node2D
 func _ready() -> void:
 	pass # Replace with function body.
 
-
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	queue_redraw()
 
-
-
 func _draw():
-	draw_circle(primaryNode.playerPosition, primaryNode.playerWidth / 2, Color.GREEN)
-	
+	for player in primaryNode.players:
+		#draw_circle(player.playerPosition, player.playerWidth / 2, player.color)
+		draw_circle(player.playerPosition, player.playerWidth / 2 , Color.WHITE, true, -1, true)
