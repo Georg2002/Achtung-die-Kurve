@@ -1,14 +1,28 @@
-extends Node2D
+class_name Item
 
-class_name Items
+enum EffectTypes {POSITIVE, NEGATIVE, UNIVERSAL}
 
 var id : int
+var timer : float
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
+var texture : ImageTexture
+var position : Vector2
+var effectType : EffectTypes
+static var size : Vector2 = Vector2(32, 32)
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func apply(_player : Wurm) -> void:
 	pass
+
+func unapply(_player : Wurm) -> void:
+	pass
+
+func doTimestep(delta : float) -> void:
+	timer -= delta
+	
+func isFinished() -> bool:
+	return timer < 0
+
+static var ItemTypes = [ItemThinPositive, ItemThinNegative]#ItemFatPositive, ItemFatNegative
+static func getRandomItem() -> Item:
+	return ItemTypes[randi_range(0, ItemTypes.size() - 1)].new()
+	

@@ -18,7 +18,9 @@ var roundWinner : String
 	
 var root_view_image : Image
 
-func detectCollision(player : Wurm):		
+func detectCollision(player : Wurm):
+	if player.gapLengthTimer > 0:
+		return false##no collisions in gaps
 	var radius = player.playerWidth / 2
 	if (player.playerPosition.x < radius or 
 	player.playerPosition.y < radius or
@@ -26,18 +28,33 @@ func detectCollision(player : Wurm):
 	viewportSize.y - player.playerPosition.y < radius):
 		return true
 	for y in range(-radius, radius):
-		var x = 2
+		var x = max(player.playerWidth / 2, 2)
 		var offset = Vector2(x, y).rotated(player.playerRotation)
 		var testPos = player.playerPosition + offset
 		if (testPos.x < 0 or testPos.y < 0 or 
 		testPos.x > viewportSize.x or testPos.y > viewportSize.y):
 			return true
-		var pixel = root_view_image.get_pixel(testPos.x, testPos.y)		
-		#print(pixel)
+		var pixel = root_view_image.get_pixel(testPos.x, testPos.y)				
 		if pixel != Color.BLACK:
 			print(pixel)
 			return true		
 	return false
+
+func detectItemCollect(player : Wurm) -> Item:
+	for item in items:
+		var dist = (player.playerPosition - item.position).abs()
+		if dist.x > item.size.x / 2:
+			dist.x -= item.size.x / 2
+		else:
+			dist.x = 0
+		if dist.y > item.size.y / 2:
+			dist.y -= item.size.y / 2
+		else:
+			dist.y = 0
+		if dist.length() < player.playerWidth / 2:
+			return item
+	return null
+			
 
 func findPlayer(i : int):
 	for player in players:
@@ -49,9 +66,12 @@ func setLabels():
 	for player in players:
 		scoreLabel.text += "\n" + player.name + ": " + str(player.score) + " Punkte"
 
+var itemTimer = 1#0
+var items : Array[Item] = []
+var appliedItems : Array[Item] = []
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	print(States.keys()[stateVar])
+	#print(States.keys()[stateVar])
 	
 	var startPressed = Input.is_action_just_pressed("start")
 	viewport = node.get_viewport()
@@ -61,6 +81,18 @@ func _process(delta: float) -> void:
 	root_view_image = root_view_tex.get_image()
 		
 	if stateVar == States.RUNNING:
+		itemTimer -= delta
+		if itemTimer < 0:
+			itemTimer = 10
+			var newItem = Item.getRandomItem()
+			newItem.position = Vector2(randf_range(Item.size.x, viewportSize.x - Item.size.x),
+			 randf_range(Item.size.y, viewportSize.y - Item.size.y))
+			items.append(newItem)
+		for item in appliedItems:
+			item.doTimestep(delta)
+			if item.isFinished():
+				appliedItems.remove_at(appliedItems.find(item))
+		
 		if startPressed:
 			stateVar = States.PAUSED
 			startPressed = false
@@ -76,12 +108,30 @@ func _process(delta: float) -> void:
 					player.dead = detectCollision(player)
 				if deadTimer > 0:
 					player.move(delta / steps)
+					var collectedItem = detectItemCollect(player)
+					if collectedItem != null:
+						items.remove_at(items.find(collectedItem))
+						if collectedItem.effectType == Item.EffectTypes.POSITIVE:
+							collectedItem.apply(player)
+							player.items.append(collectedItem)
+						elif collectedItem.effectType == Item.EffectTypes.NEGATIVE:
+							appliedItems.append(collectedItem)
+							for otherPlayer in players:
+								if otherPlayer == player:
+									continue
+								collectedItem.apply(otherPlayer)
+								otherPlayer.items.append(collectedItem)
+						elif collectedItem.effectType == Item.EffectTypes.UNIVERSAL:
+							appliedItems.append(collectedItem)
+							for otherPlayer in players:
+								collectedItem.apply(otherPlayer)
+								otherPlayer.items.append(collectedItem)
 				
 			if player.dead:
 				playersAlive -= 1
 				deadTimer -= delta
-				if playersAlive == 1:
-					stateVar = States.END
+			#if playersAlive == 1:
+				#stateVar = States.END
 						
 	if stateVar == States.PAUSED and startPressed:
 		stateVar = States.RUNNING
@@ -117,6 +167,7 @@ func _draw():
 	if stateVar == States.END_WAITFORCLEAR and Input.is_action_just_pressed("start"):
 		draw_rect(get_viewport_rect(), Color.BLACK, true)
 		stateVar = States.START
+		items.clear()
 		return
 		
 	for player in players:
@@ -132,5 +183,5 @@ func _draw():
 			#draw_circle(center, 2, Color.HOT_PINK)		
 			var rotStart = player.playerLastRotation-dir*PI/2
 			var rotEnd = player.playerRotation-dir*PI/2*0.99#0.99 to make segments overlap better
-			draw_arc(center, radius, rotStart, rotEnd, 20, player.color, player.playerWidth)	
+			draw_arc(center, radius, rotStart, rotEnd, 20, player.color, player.playerWidth)
 	pass

@@ -30,7 +30,16 @@ func _ready() -> void:
 func get_input(): 
 	return int(Input.is_key_pressed(self.keyRight)) - int(Input.is_key_pressed(self.keyLeft))
 
-func move(delta):	
+var items : Array[Item] = []
+
+func move(delta):
+		for item in items:
+			if item.effectType == Item.EffectTypes.POSITIVE:#only these apply to a single player
+				item.doTimestep(delta)
+			if item.isFinished():
+				items.remove_at(items.find(item))
+				item.unapply(self)
+	
 		self.playerRotation += self.omega * self.get_input() * delta
 		self.playerMovement = self.velocity * delta * Vector2(cos(self.playerRotation), sin(self.playerRotation))
 		self.playerPosition += self.playerMovement
