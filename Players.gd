@@ -11,12 +11,24 @@ var playerWidth = 5
 var gapSpacingTimer = 0
 var gapLengthTimer = 0
 var dead = false
+var deadTimer : float = 0
 var keyLeft : int
 var keyRight : int
 var color : Color
 var name : String
 var score : int = 0
+var noborder : bool = false
 
+func WarpThroughBorder(arenaSize : Vector2):
+	if playerPosition.x < 0:
+		playerPosition.x = arenaSize.x + playerPosition.x
+	elif playerPosition.x > arenaSize.x:
+		playerPosition.x = playerPosition.x - arenaSize.x
+	if playerPosition.y < 0:
+		playerPosition.y = arenaSize.y + playerPosition.y
+	elif playerPosition.y > arenaSize.y:
+		playerPosition.y = playerPosition.y - arenaSize.y
+	
 func _init(playerName : String, playerColor : Color,  playerKeyLeft : int, playerKeyRight : int):
 	self.name = playerName
 	self.keyLeft = playerKeyLeft

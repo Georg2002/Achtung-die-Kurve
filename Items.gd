@@ -22,7 +22,7 @@ func doTimestep(delta : float) -> void:
 func isFinished() -> bool:
 	return timer < 0
 
-static var ItemTypes = [ItemThinPositive, ItemThinNegative]#ItemFatPositive, ItemFatNegative
+static var ItemTypes = [ItemNoBorder]#, ItemThinPositive, ItemThinNegative, ItemFatPositive, ItemFatNegative]
 static func getRandomItem() -> Item:
 	return ItemTypes[randi_range(0, ItemTypes.size() - 1)].new()
 	

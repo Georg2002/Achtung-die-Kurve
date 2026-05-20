@@ -26,14 +26,15 @@ func detectCollision(player : Wurm):
 	player.playerPosition.y < radius or
 	viewportSize.x - player.playerPosition.x < radius or
 	viewportSize.y - player.playerPosition.y < radius):
-		return true
+		return not player.noborder
+		
 	for y in range(-radius, radius):
 		var x = max(player.playerWidth / 2, 2)
 		var offset = Vector2(x, y).rotated(player.playerRotation)
 		var testPos = player.playerPosition + offset
 		if (testPos.x < 0 or testPos.y < 0 or 
 		testPos.x > viewportSize.x or testPos.y > viewportSize.y):
-			return true
+			return not player.noborder
 		var pixel = root_view_image.get_pixel(testPos.x, testPos.y)				
 		if pixel != Color.BLACK:
 			print(pixel)
@@ -99,14 +100,13 @@ func _process(delta: float) -> void:
 		var playersAlive = players.size()
 		for player in players:
 			var steps = ceil(delta * player.velocity / 3.0)#check every 3 pixels			
-			var deadTimer = 0.000
 			player.playerLastRotation = player.playerRotation
 			player.playerLastPosition = player.playerPosition
 			for i in range(steps):
 				if not player.dead:
-					deadTimer = 5 / player.velocity
+					player.deadTimer = 3 / player.velocity
 					player.dead = detectCollision(player)
-				if deadTimer > 0:
+				if player.deadTimer > 0:
 					player.move(delta / steps)
 					var collectedItem = detectItemCollect(player)
 					if collectedItem != null:
@@ -129,7 +129,7 @@ func _process(delta: float) -> void:
 				
 			if player.dead:
 				playersAlive -= 1
-				deadTimer -= delta
+				player.deadTimer -= delta
 			#if playersAlive == 1:
 				#stateVar = States.END
 						
@@ -170,7 +170,7 @@ func _draw():
 		items.clear()
 		return
 		
-	for player in players:
+	for player in players:		
 		if player.gapLengthTimer > 0:
 			return
 		if player.playerLastRotation == player.playerRotation:
@@ -184,4 +184,9 @@ func _draw():
 			var rotStart = player.playerLastRotation-dir*PI/2
 			var rotEnd = player.playerRotation-dir*PI/2*0.99#0.99 to make segments overlap better
 			draw_arc(center, radius, rotStart, rotEnd, 20, player.color, player.playerWidth)
+			
+		if player.dead and player.deadTimer > -0.1:#make a kind of endcap for dead players
+			draw_circle(player.playerPosition, player.playerWidth / 2, player.color, true, -1)
+		if player.noborder:
+			player.WarpThroughBorder(viewportSize)
 	pass
