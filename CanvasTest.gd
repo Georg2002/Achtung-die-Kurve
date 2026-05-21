@@ -84,7 +84,7 @@ func _process(delta: float) -> void:
 	if stateVar == States.RUNNING:
 		itemTimer -= delta
 		if itemTimer < 0:
-			itemTimer = 10
+			itemTimer = 3#10
 			var newItem = Item.getRandomItem()
 			newItem.position = Vector2(randf_range(Item.size.x, viewportSize.x - Item.size.x),
 			 randf_range(Item.size.y, viewportSize.y - Item.size.y))
@@ -99,7 +99,7 @@ func _process(delta: float) -> void:
 			startPressed = false
 		var playersAlive = players.size()
 		for player in players:
-			var steps = ceil(delta * player.velocity / 3.0)#check every 3 pixels			
+			var steps = ceil(delta * player.velocity)#check every pixels			
 			player.playerLastRotation = player.playerRotation
 			player.playerLastPosition = player.playerPosition
 			for i in range(steps):
@@ -130,8 +130,9 @@ func _process(delta: float) -> void:
 			if player.dead:
 				playersAlive -= 1
 				player.deadTimer -= delta
-			#if playersAlive == 1:
-				#stateVar = States.END
+				player.items.clear
+			if playersAlive == 1:
+				stateVar = States.END
 						
 	if stateVar == States.PAUSED and startPressed:
 		stateVar = States.RUNNING
@@ -168,9 +169,14 @@ func _draw():
 		draw_rect(get_viewport_rect(), Color.BLACK, true)
 		stateVar = States.START
 		items.clear()
+		appliedItems.clear()
 		return
 		
-	for player in players:		
+	for player in players:
+		for item in player.items:
+			if item.transientType and typeof(item) == typeof(ItemClear):
+				player.items.remove_at(player.items.find(item))
+				draw_rect(get_viewport_rect(), Color.BLACK, true)
 		if player.gapLengthTimer > 0:
 			return
 		if player.playerLastRotation == player.playerRotation:
