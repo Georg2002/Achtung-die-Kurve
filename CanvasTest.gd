@@ -130,7 +130,6 @@ func _process(delta: float) -> void:
 			if player.dead:
 				playersAlive -= 1
 				player.deadTimer -= delta
-				player.items.clear
 			if playersAlive == 1:
 				stateVar = States.END
 						
@@ -170,6 +169,11 @@ func _draw():
 		stateVar = States.START
 		items.clear()
 		appliedItems.clear()
+		for player in players:
+			player.deadTimer = 0.01
+			for item in player.items:
+				item.unapply(player)
+			player.items.clear()
 		return
 		
 	for player in players:
